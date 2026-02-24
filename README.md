@@ -26,18 +26,19 @@
 
 ## 📌 Latest Updates
 
+- **[2026-02-24]** 🗺️ We have officially released the code for **AMB3R-SfM**.
 - **[2026-02-21]** 🏎️ We have officially released the code for **AMB3R-VO**.
 - **[2026-02-21]** 🍯 We have officially released the code for **AMB3R (Base model)**.
 
 <details>
 <summary><b>🔜 TODOs / Upcoming</b></summary>
 
-- [ ] 🚧 Code Release: **AMB3R-SfM**
 - [ ] 🚧 Code Release: **AMB3R Benchmark**
 
 </details>
 
 <a id="installation"></a>
+
 ## Installation
 
 **1. Clone the repository**
@@ -104,7 +105,7 @@ python slam/run.py --data_path <path-to-video-folder>
 Our AMB3R-VO framework is a general framework that is compatible with any base model that produces pointmap, camera pose, and confidence. All you need to do is to add this function to your base model and plug it into our amb3r-vo pipeline `pipeline = AMB3R_VO(model)`:
 
 ```python
-def run_amb3r_vo(self, frames, cfg, keyframe_memory):
+def run_amb3r_vo(self, frames, cfg, keyframe_memory=None):
     """
     This function runs the AMB3R-VO  with your own base model.
     """
@@ -125,7 +126,34 @@ def run_amb3r_vo(self, frames, cfg, keyframe_memory):
 <a id="sfm-amb3r-sfm"></a>
 ## 🗺️ SfM (AMB3R-SfM)
 
-*Coming soon...*
+### Usage
+
+Run the AMB3R-SfM pipeline with:
+
+```bash
+python sfm/run.py --data_path <path-to-video-folder>
+```
+
+### Custom Base Model
+
+Our AMB3R-SfM framework is also a general framework that is compatible with any base model that produces pointmap, camera pose, and confidence. All you need to do is to add this function to your base model and plug it into our amb3r-sfm pipeline `pipeline = AMB3R_SfM(model)`:
+
+```python
+def run_amb3r_sfm(self, frames, cfg, keyframe_memory=None, benchmark_conf0=None):
+    """
+    This function runs the AMB3R-SfM  with your own base model.
+    """
+    images = frames['images'] # (B, T, C, H, W) in [-1, 1]
+    
+    # Run your own base model to get pointmap, pose, and confidence
+    pointmap, pose, confidence = self.forward(images)
+
+    return {
+        'world_points': pointmap,           # (B, nimgs, H, W, 3)
+        'world_points_conf': confidence,    # (B, nimgs, H, W, 1)
+        'pose': pose,                       # (B, nimgs, 4, 4)
+    }
+```
 
 ---
 
@@ -141,7 +169,7 @@ def run_amb3r_vo(self, frames, cfg, keyframe_memory):
 Our code, data preprocessing pipeline, and evaluation scripts are built upon several amazing open-source projects:
 
 - **Models:** [VGGT](https://github.com/facebookresearch/vggt), [Pointcept](https://github.com/Pointcept/Pointcept), [Spann3R](https://github.com/HengyiWang/spann3r), [DUSt3R](https://github.com/naver/dust3r), [MoGe](https://github.com/microsoft/MoGe), [CroCo](https://github.com/naver/croco)
-- **Evaluation:** [MVSAnywhere](https://github.com/nianticlabs/mvsanywhere), [visloc_pseudo_gt_limitations](https://github.com/tsattler/visloc_pseudo_gt_limitations)
+- **Evaluation:** [Marigold](https://github.com/prs-eth/Marigold), [Diffusion-E2E](https://github.com/VisualComputingInstitute/diffusion-e2e-ft), [RMVD](https://github.com/lmb-freiburg/robustmvd), [MVSA](https://github.com/nianticlabs/mvsanywhere), [visloc_pseudo_gt](https://github.com/tsattler/visloc_pseudo_gt_limitations), [FVS](https://github.com/isl-org/FreeViewSynthesis)
 
 We sincerely thank the authors for their open-source contributions!
 

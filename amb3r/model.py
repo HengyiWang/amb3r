@@ -394,7 +394,7 @@ class AMB3R(nn.Module):
     
 
     @torch.inference_mode()
-    def extact_amb3r_sfm_features(self, views):
+    def extract_amb3r_sfm_features(self, views):
         '''
         AMB3R-SfM interface - feature extraction for image clustering
         '''
@@ -444,5 +444,31 @@ class AMB3R(nn.Module):
         res_all.append(res1)
 
         return res_all[-1]
+    
+    
+    def run_amb3r_benchmark(self, frames):
+        '''
+        Forward pass of AMB3R 1) front-end processing 2) back-end processing
+        '''
+        
+        # Front-end processing
+        images, patch_tokens = self.front_end.encode_patch_tokens(frames)
+
+        res_f = self.front_end.decode_patch_tokens_and_heads(images, patch_tokens)
+
+        # Back-end processing
+        voxel_feat_aligned, voxel_feat_aligned_vis, voxel_layer_list = self.get_voxel_feat(res_f)
+        patch_tokens = self.front_end.add_voxel_feat_to_patch_tokens(patch_tokens, voxel_feat_aligned_vis)
+        res_b = self.front_end.decode_patch_tokens_and_heads(images, patch_tokens, voxel_feat=voxel_feat_aligned, voxel_layer_list=voxel_layer_list)
+
+        out = {
+            'world_points': res_b['world_points'],
+            'depth': res_b['depth'],
+            'pose': res_b['pose'],
+        }
+
+        return out
+
+
 
 

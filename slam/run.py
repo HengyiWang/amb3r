@@ -78,6 +78,7 @@ def main():
         pts_mask, sky_mask = get_pts_mask(pts_pred, views_all['images'], conf_pred, conf_threshold=args.conf_threshold)
     else:
         pts_mask = conf_pred >= args.conf_threshold
+        sky_mask = torch.zeros_like(pts_mask)
 
     # Save pts
     pts_kf = pts_pred[kf_idx].cpu().numpy().reshape(-1, 3)

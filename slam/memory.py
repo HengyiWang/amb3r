@@ -221,10 +221,3 @@ class SLAMemory():
             # Keyframe management
             self.keyframe_management()
             
-
-
-        
-
-        
-        
-        
