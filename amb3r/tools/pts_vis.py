@@ -316,7 +316,7 @@ def get_pts_edge_mask(pts, sky_mask=None, conf=None, conf_threshold=1e-2, edge_n
 
 
 
-def get_sky_mask(images, chunk_size=20):
+def get_sky_mask(images, chunk_size=20, segformer_path='./checkpoints/segformer.b0.512x512.ade.160k.pth'):
     '''Generate a sky mask for a batch of images using a pre-trained SegFormer model.
     
     Args:
@@ -326,7 +326,7 @@ def get_sky_mask(images, chunk_size=20):
         - sky_mask (np.ndarray): A boolean mask of shape (T, H, W) where True indicates sky pixels.
     '''
     segformer = EncoderDecoder()
-    segformer.load_state_dict(torch.load('./checkpoints/segformer.b0.512x512.ade.160k.pth', map_location=torch.device('cpu'), weights_only=False)['state_dict'])
+    segformer.load_state_dict(torch.load(segformer_path, map_location=torch.device('cpu'), weights_only=False)['state_dict'])
     segformer.cuda()
     segformer.eval()
     with torch.no_grad():
@@ -359,13 +359,15 @@ def get_sky_mask(images, chunk_size=20):
     return sky_mask
 
 
-def get_pts_mask(pts, images=None, conf=None, conf_threshold=1e-2, edge_normal_threshold=5.0, edge_depth_threshold=0.008):
+def get_pts_mask(pts, images=None, conf=None, conf_threshold=1e-2, 
+                 edge_normal_threshold=5.0, edge_depth_threshold=0.008,
+                 segformer_path='./checkpoints/segformer.b0.512x512.ade.160k.pth'):
     '''
     Generate a mask for points based on edge detection and sky segmentation.
     '''
     sky_mask = None
     if images is not None:
-        sky_mask = get_sky_mask(images)
+        sky_mask = get_sky_mask(images, segformer_path=segformer_path)
 
     edge_mask = get_pts_edge_mask(pts, sky_mask=sky_mask, conf=conf, conf_threshold=conf_threshold, edge_normal_threshold=edge_normal_threshold, edge_depth_threshold=edge_depth_threshold)
     

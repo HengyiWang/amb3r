@@ -134,19 +134,20 @@ class FrontEnd(nn.Module):
             
 
         predictions["images"] = images
-        median_pred_values_flat, _ = torch.median(predictions["depth"].view(Bs * nimgs, H * W), dim=1)
-        median_pred_values_flat = median_pred_values_flat.view(Bs, nimgs, 1)
-        predictions["median_metric_z"] = median_z_log.exp()
 
+        if self.metric_scale:
+            median_pred_values_flat, _ = torch.median(predictions["depth"].view(Bs * nimgs, H * W), dim=1)
+            median_pred_values_flat = median_pred_values_flat.view(Bs, nimgs, 1)
+            predictions["median_metric_z"] = median_z_log.exp()
 
-        metric_scale = predictions["median_metric_z"] / (median_pred_values_flat + 1e-8) # Bs, nimgs, 1
-        metric_scale_median, _ = torch.median(metric_scale, dim=1, keepdim=True)  # Bs, 1, 1
-
-        predictions["enc"] = patch_tokens.view(Bs, nimgs, patch_tokens.shape[-2], patch_tokens.shape[-1])
-        predictions["dec"] = aggregated_tokens_list[-1].view(Bs, nimgs, aggregated_tokens_list[-1].shape[-2], aggregated_tokens_list[-1].shape[-1])[..., ps_idx:, :]
-        predictions["depth_metric"] = depth * metric_scale_median.view(Bs, 1, 1, 1, 1)
+            metric_scale = predictions["median_metric_z"] / (median_pred_values_flat + 1e-8) # Bs, nimgs, 1
+            metric_scale_median, _ = torch.median(metric_scale, dim=1, keepdim=True)  # Bs, 1, 1
+            predictions["depth_metric"] = depth * metric_scale_median.view(Bs, 1, 1, 1, 1)
 
         Bs, nimgs, H, W, one_ = depth.shape
+        predictions["enc"] = patch_tokens.view(Bs, nimgs, patch_tokens.shape[-2], patch_tokens.shape[-1])
+        predictions["dec"] = aggregated_tokens_list[-1].view(Bs, nimgs, aggregated_tokens_list[-1].shape[-2], aggregated_tokens_list[-1].shape[-1])[..., ps_idx:, :]
+
         extrinsic, intrinsic = pose_encoding_to_extri_intri(predictions["pose_enc"], images.shape[-2:])
         point_map_by_unprojection = unproject_depth_map_to_point_map_torch(predictions["depth"].view(-1, H, W, 1), 
                                                                 extrinsic.view(-1, 3, 4),

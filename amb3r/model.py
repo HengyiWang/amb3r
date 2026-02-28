@@ -465,6 +465,7 @@ class AMB3R(nn.Module):
             'world_points': res_b['world_points'],
             'depth': res_b['depth'],
             'pose': res_b['pose'],
+            'pts3d_by_unprojection': res_b['pts3d_by_unprojection'],
         }
 
         return out

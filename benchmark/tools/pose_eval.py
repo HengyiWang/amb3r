@@ -1,6 +1,7 @@
 import os
 import sys
 import evo
+import evo.tools.plot
 import json
 import torch
 import numpy as np

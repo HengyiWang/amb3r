@@ -11,7 +11,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-robustmvd_path = os.path.join(project_root, "thirdparty", "robustmvd")
+robustmvd_path = os.path.join(current_dir, "tools", "robustmvd")
 if robustmvd_path not in sys.path:
     sys.path.insert(0, robustmvd_path)
 
@@ -28,7 +28,7 @@ def get_args_parser():
 
 @torch.no_grad()
 def main(args):
-    model = AMB3R(use_metric=args.metric)
+    model = AMB3R(metric_scale=args.metric)
     model.load_weights(os.path.join(project_root, 'checkpoints', 'amb3r.pt'))
     model = prepare_custom_model(model, num_gpus=1)
 

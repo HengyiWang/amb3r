@@ -1,22 +1,33 @@
 import os
 import cv2
-import torch
+import sys
 import csv
+import torch
+import argparse
 import numpy as np
 
 
-
+from tqdm import tqdm
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 
-from tabulate import tabulate
+
+
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from amb3r.model import AMB3R
+
+from tools import metric
 from tools.mono import get_dataset
 from tools.alignment import  align_depth_least_square
 
-from tools import metric
+
+def get_args_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_path', type=str, default="../data/marigold_data/")
+    parser.add_argument('--results_path', type=str, default="./outputs/monodepth")
+    return parser
 
 
 def resize_rgb_int_cv2(rgb_int, max_res=518, divisible_by=14, target_resolution=None):
@@ -73,8 +84,6 @@ def resize_rgb_int_cv2(rgb_int, max_res=518, divisible_by=14, target_resolution=
     resized_images = []
     for i in range(B):
         image_np = rgb_int[i].permute(1, 2, 0).numpy()
-        
-        print(f"Resizing image {i+1}/{B} from {H}x{W} to {new_H}x{new_W}")
         resized_image_np = cv2.resize(
             image_np, (new_W, new_H), interpolation=cv2.INTER_LINEAR
         )
@@ -85,16 +94,15 @@ def resize_rgb_int_cv2(rgb_int, max_res=518, divisible_by=14, target_resolution=
     return torch.stack(resized_images)
 
 
-ckpt_path = './checkpoints/amb3r.pt'
+args = get_args_parser().parse_args()
+
+ckpt_path = '../checkpoints/amb3r.pt'
 model = AMB3R()
 model.load_weights(ckpt_path)
 model.cuda()
 
-results_path = "./outputs/monodepth"
-os.makedirs(results_path, exist_ok=True)
 
-
-base_data_dir = "../monodepth/"
+os.makedirs(args.results_path, exist_ok=True)
 
 
 datasets_config = {
@@ -145,7 +153,7 @@ for dataset_name, config in datasets_config.items():
     cfg_data = OmegaConf.load(dataset_config)
 
     dataset = get_dataset(
-        cfg_data, base_data_dir=base_data_dir, mode=mode
+        cfg_data, base_data_dir=args.data_path, mode=mode
     )
 
     dataloader = DataLoader(dataset, batch_size=1, num_workers=0)
@@ -210,9 +218,13 @@ for dataset_name, config in datasets_config.items():
     table_data = [[key, f"{val:.4f}"] for key, val in results.items()]
 
     print(f"Results for dataset: {dataset_name}")
-    print(tabulate(table_data, headers=headers, tablefmt="grid"))
+    # Simple print
+    print(f"{headers[0]:<30} | {headers[1]}")
+    print("-" * 45)
+    for key, val in table_data:
+        print(f"{key:<30} | {val}")
 
-    filename = f"{results_path}/{dataset_name}_results.csv"
+    filename = f"{args.results_path}/{dataset_name}_results.csv"
     with open(filename, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(headers)

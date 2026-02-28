@@ -12,4 +12,9 @@ spconv-cu118==2.3.8
 timm==0.6.7
 omegaconf==2.3.0
 evo==1.31.1
+pytoml==0.1.21
+tensorboard==2.18.0
+scikit-image==0.24.0
+dill==0.3.8
+easydict==1.13
 utils3d @ git+https://github.com/EasternJournalist/utils3d.git@c5daf6f6c244d251f252102d09e9b7bcef791a38

@@ -25,7 +25,7 @@
 ```
 
 ## 📌 Latest Updates
-
+- **[2026-02-28]** 📊 We have officially released the code for **AMB3R Benchmark**.
 - **[2026-02-24]** 🗺️ We have officially released the code for **AMB3R-SfM**.
 - **[2026-02-21]** 🏎️ We have officially released the code for **AMB3R-VO**.
 - **[2026-02-21]** 🍯 We have officially released the code for **AMB3R (Base model)**.
@@ -33,7 +33,8 @@
 <details>
 <summary><b>🔜 TODOs / Upcoming</b></summary>
 
-- [ ] 🚧 Code Release: **AMB3R Benchmark**
+- [ ] visualizer for AMB3R
+- [ ] support of various foundation models for AMB3R-VO and AMB3R-SfM
 
 </details>
 
@@ -160,7 +161,7 @@ def run_amb3r_sfm(self, frames, cfg, keyframe_memory=None, benchmark_conf0=None)
 <a id="benchmark"></a>
 ## 📊 Benchmark
 
-*Coming soon...*
+Please refer to [benchmark/README.md](benchmark/README.md) for the benchmark details.
 
 ---
 

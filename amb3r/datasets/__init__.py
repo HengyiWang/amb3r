@@ -3,6 +3,16 @@ import sys
 import torch 
 import numpy as np
 from .demo import Demo
+from .seven_scenes import SevenScenes   
+from .eth3d import Eth3d
+from .dtu import Dtu
+
+from .sintel import Sintel
+from .bonn import Bonn
+from .kitti import Kitti
+
+from .tnt import Tnt
+from .imc import Imc
 
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'thirdparty'))
