@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from torch.utils.data import DataLoader
 
 from amb3r.model import AMB3R
+from amb3r.model_zoo import load_model
 from amb3r.tools.pts_vis import get_pts_mask
 
 from slam.pipeline import AMB3R_VO
@@ -28,7 +29,9 @@ def get_args_parser():
     parser.add_argument('--data_path', type=str, default="./demo")
     parser.add_argument('--demo_name', type=str, default="demo")
     parser.add_argument('--results_path', type=str, default="./outputs/slam/demo")
-    parser.add_argument('--target_point_count', type=int, default=3_000_000)
+    parser.add_argument('--model_name', type=str, default="amb3r", choices=['amb3r', 'da3'])
+    parser.add_argument('--ckpt_path', type=str, default="./checkpoints/amb3r.pt")
+    parser.add_argument('--target_point_count', type=int, default=6_000_000)
     parser.add_argument('--edge_mask', type=bool, default=True)
     parser.add_argument('--conf_threshold', type=float, default=0.0)
     parser.add_argument('--save_res', type=bool, default=True)
@@ -44,8 +47,7 @@ def main():
 
 
     os.makedirs(args.results_path, exist_ok=True)
-    model = AMB3R()
-    model.load_weights('./checkpoints/amb3r.pt')
+    model = load_model(args.model_name, ckpt_path=args.ckpt_path)
             
     model.cuda()
     model.eval()
@@ -97,7 +99,7 @@ def main():
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(pts_kf)
     pcd.colors = o3d.utility.Vector3dVector(color_kf)
-    o3d.io.write_point_cloud(os.path.join(args.results_path, f"scene_{args.demo_name}_keyframe_points.ply"), pcd)
+    o3d.io.write_point_cloud(os.path.join(args.results_path, f"scene_{args.demo_name}_downsampled_kf_pts.ply"), pcd)
     
     if args.save_res:
         res_save = {

@@ -123,6 +123,14 @@ def run_amb3r_vo(self, frames, cfg, keyframe_memory=None):
     }
 ```
 
+#### AMB3R-VO (DA3)
+
+Run the AMB3R-VO (DA3) with:
+
+```bash
+python slam/run.py --data_path <path-to-video-folder> --model_name da3 --ckpt_path depth-anything/DA3NESTED-GIANT-LARGE
+```
+
 ---
 
 <a id="sfm-amb3r-sfm"></a>
