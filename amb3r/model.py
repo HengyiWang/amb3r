@@ -62,9 +62,10 @@ class AMB3R(nn.Module):
         if 'model' in state_dict:
             state_dict = state_dict['model']
 
-        # Auto-detect interp_v2 from checkpoint
         interp_key = 'backend.interp_v2'
-        if interp_key in state_dict and state_dict[interp_key].item():
+        if interp_key not in state_dict:
+            state_dict[interp_key] = torch.tensor(False, dtype=torch.bool)
+        elif state_dict[interp_key].item():
             self.backend.interp_v2.fill_(True)
 
         self.load_state_dict(state_dict, strict=strict)
